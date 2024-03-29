@@ -5,5 +5,16 @@
   "output_size": 1,
   "learning_rate": 0.00001,
   "epochs": 1000,
-  "batch_size": 64
+  "batch_size": 64,
+  "tau_values": [
+    {"tauo": -0.80, "tauu":  -0.60, "taud": -0.20},
+    {"tauo": -0.50, "tauu":  -0.40, "taud": -0.10},
+    {"tauo": -0.05, "tauu":  -0.05, "taud": -0.01},
+    {"tauo": -0.05, "tauu":  -0.50, "taud": -0.01},
+    {"tauo": 0.05, "tauu":  0.05, "taud": 0.01},
+    {"tauo": 0.1, "tauu":  0.2, "taud": 0.1},
+    {"tauo": 0.2, "tauu":  0.4, "taud": 0.2},
+    {"tauo": 0.4, "tauu":  0.5, "taud": 0.3},
+    {"tauo": 0.6, "tauu":  0.8, "taud": 0.5}
+  ]
 }

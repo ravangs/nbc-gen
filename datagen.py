@@ -1,24 +1,36 @@
 import numpy as np
 
 
-def generate_darboux(num_points=500):
-    np.random.seed(42)
+def generate_points_for_region(condition, num_points):
+    points = []
+    while len(points) < num_points:
+        x = np.random.uniform(-2, 2)
+        y = np.random.uniform(-2, 2)
+        if condition(x, y):
+            points.append((x, y))
+    return np.array(points)
 
-    x = np.random.uniform(-2, 2, num_points)
-    y = np.random.uniform(-2, 2, num_points)
 
-    # safe and unsafe conditions
-    xo_condition = (0 <= x) & (x <= 1) & (1 <= y) & (y <= 2)
-    xu_condition = x + y ** 2 <= 0
+def generate_darboux(num_points_per_region=500):
 
-    # Get labels
-    labels = np.zeros(num_points)
-    labels[xo_condition] = 1
-    labels[xu_condition] = 2
+    Xo = generate_points_for_region(condition_o, num_points_per_region)
+    Xu = generate_points_for_region(condition_u, num_points_per_region)
+    Xn = generate_points_for_region(condition_n, num_points_per_region)
 
-    # Data
-    X = np.vstack((x, y)).T
-    Xo = np.vstack((x[xo_condition], y[xo_condition])).T
-    Xu = np.vstack((x[xu_condition], y[xu_condition])).T
+    X = np.vstack((Xo, Xu, Xn))
+
+    labels = np.array([1] * len(Xo) + [2] * len(Xu) + [0] * len(Xn))
 
     return X, Xo, Xu, labels
+
+
+def condition_o(x, y):
+    return 0 <= x <= 1 <= y <= 2
+
+
+def condition_u(x, y):
+    return x + y ** 2 <= 0
+
+
+def condition_n(x, y):
+    return not (condition_o(x, y) or condition_u(x, y))

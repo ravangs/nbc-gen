@@ -1,28 +1,41 @@
 from datagen import generate_darboux
 from visualise import visualise_darboux, plot_model
-from utils import load_config
+from utils import load_config, startup, save_results_to_csv, save_model, evaluate_model_conditions
 from architecture import NeuralBarrierCertificate
 
 
 def main():
-    X, Xo, Xu, labels = generate_darboux(10000)
+    image_dir, model_dir, results_dir = startup()
 
-    visualise_darboux(X, Xo, Xu)
+    X, Xo, Xu, labels = generate_darboux(500)
+
+    visualise_darboux(image_dir, X, Xo, Xu)
 
     config = load_config()
 
-    model = NeuralBarrierCertificate(X, labels, input_size=config["input_size"],
-                                     count=config["count"],
-                                     order=config["order"],
-                                     output_size=config["output_size"],
-                                     learning_rate=config["learning_rate"])
+    results = []
+    for tau_value in config['tau_values']:
+        model = NeuralBarrierCertificate(X, labels, input_size=config["input_size"],
+                                         count=config["count"],
+                                         order=config["order"],
+                                         output_size=config["output_size"],
+                                         learning_rate=config["learning_rate"],
+                                         batch_size=config["batch_size"], results_dir=results_dir)
 
-    model.train()
-    model.train_model(epochs=config["epochs"])
-    model.eval()
-    plot_model(model)
+        model.train()
+        model.train_model(epochs=config["epochs"], tauo=tau_value['tauo'], tauu=tau_value['tauu'],
+                          taud=tau_value['taud'])
 
+        save_model(model, model_dir, tau_value)
 
+        model.eval()
+        plot_model(model, image_dir, tau_value)
+
+        Xo_prob, Xu_prob = evaluate_model_conditions(model, Xo, Xu)
+
+        results.append([tau_value['tauo'], tau_value['tauu'], tau_value['taud'], Xo_prob, Xu_prob])
+
+    save_results_to_csv(results, results_dir)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,36 @@
+2024-03-22 14:17:44,904 - training - INFO - Training model with Tauo = -0.8, Tauu = -0.6, Taud = -0.2
+2024-03-22 14:17:45,466 - training - INFO - Epoch 1, Combined Loss: 16.3350
+2024-03-22 14:18:05,425 - training - INFO - Epoch 501, Combined Loss: 3.2596
+2024-03-22 14:18:24,594 - training - INFO - Final Loss: -1.4325
+2024-03-22 14:18:24,832 - training - INFO - Training model with Tauo = -0.5, Tauu = -0.4, Taud = -0.1
+2024-03-22 14:18:24,871 - training - INFO - Epoch 1, Combined Loss: 6.3856
+2024-03-22 14:18:44,032 - training - INFO - Epoch 501, Combined Loss: -0.5592
+2024-03-22 14:19:03,106 - training - INFO - Final Loss: -2.0330
+2024-03-22 14:19:03,318 - training - INFO - Training model with Tauo = -0.05, Tauu = -0.05, Taud = -0.01
+2024-03-22 14:19:03,358 - training - INFO - Epoch 1, Combined Loss: 4.2541
+2024-03-22 14:19:22,545 - training - INFO - Epoch 501, Combined Loss: -0.0421
+2024-03-22 14:19:41,748 - training - INFO - Final Loss: -0.1960
+2024-03-22 14:19:41,980 - training - INFO - Training model with Tauo = -0.05, Tauu = -0.5, Taud = -0.01
+2024-03-22 14:19:42,019 - training - INFO - Epoch 1, Combined Loss: 7.2876
+2024-03-22 14:20:01,120 - training - INFO - Epoch 501, Combined Loss: 2.6850
+2024-03-22 14:20:20,660 - training - INFO - Final Loss: 0.4068
+2024-03-22 14:20:20,899 - training - INFO - Training model with Tauo = 0.05, Tauu = 0.05, Taud = 0.01
+2024-03-22 14:20:20,939 - training - INFO - Epoch 1, Combined Loss: 1.8827
+2024-03-22 14:20:40,094 - training - INFO - Epoch 501, Combined Loss: 0.2334
+2024-03-22 14:20:59,112 - training - INFO - Final Loss: 0.2259
+2024-03-22 14:20:59,338 - training - INFO - Training model with Tauo = 0.1, Tauu = 0.2, Taud = 0.1
+2024-03-22 14:20:59,378 - training - INFO - Epoch 1, Combined Loss: 3.0274
+2024-03-22 14:21:18,554 - training - INFO - Epoch 501, Combined Loss: 2.3663
+2024-03-22 14:21:37,605 - training - INFO - Final Loss: 2.3585
+2024-03-22 14:21:37,814 - training - INFO - Training model with Tauo = 0.2, Tauu = 0.4, Taud = 0.2
+2024-03-22 14:21:37,854 - training - INFO - Epoch 1, Combined Loss: 6.2285
+2024-03-22 14:21:57,457 - training - INFO - Epoch 501, Combined Loss: 4.7491
+2024-03-22 14:22:17,494 - training - INFO - Final Loss: 4.7293
+2024-03-22 14:22:17,710 - training - INFO - Training model with Tauo = 0.4, Tauu = 0.5, Taud = 0.3
+2024-03-22 14:22:17,751 - training - INFO - Epoch 1, Combined Loss: 7.4788
+2024-03-22 14:22:37,497 - training - INFO - Epoch 501, Combined Loss: 7.1076
+2024-03-22 14:22:56,869 - training - INFO - Final Loss: 7.0869
+2024-03-22 14:22:57,101 - training - INFO - Training model with Tauo = 0.6, Tauu = 0.8, Taud = 0.5
+2024-03-22 14:22:57,143 - training - INFO - Epoch 1, Combined Loss: 11.9514
+2024-03-22 14:23:16,435 - training - INFO - Epoch 501, Combined Loss: 11.8626
+2024-03-22 14:23:35,975 - training - INFO - Final Loss: 11.8489

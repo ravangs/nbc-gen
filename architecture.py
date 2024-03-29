@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader, TensorDataset
+from log_config import Logger
+import os
 
 
 class PolyActivation(nn.Module):
@@ -19,14 +21,27 @@ class PolyActivation(nn.Module):
         return torch.cat(outputs, dim=1)
 
 
+def prepare_data(X, labels):
+    X_safe = X[labels == 1]
+    X_unsafe = X[labels == 2]
+    X_other = X[labels == 0]
+
+    return X_safe, X_unsafe, X_other
+
+
 class NeuralBarrierCertificate(nn.Module):
-    def __init__(self, X, labels, input_size, count, order, output_size, learning_rate=0.001):
+    def __init__(self, X, labels, input_size, count, order, output_size, learning_rate, batch_size, results_dir):
         super(NeuralBarrierCertificate, self).__init__()
-        self.X_safe, self.X_unsafe, self.X_other = self.prepare_data(X, labels)
+        self.X_safe, self.X_unsafe, self.X_other = prepare_data(X, labels)
         self.learning_rate = learning_rate
+        self.batch_size = batch_size
+        log_file = os.path.join(results_dir,"training.log")
+        logger_class = Logger(log_name="training", log_file=log_file)
+        self.logger = logger_class.get_logger()
+
         neuron_count = count * order
 
-        # Define layers
+        # layers
         self.fc1 = nn.Linear(input_size, neuron_count)
         self.leaky_relu1 = nn.LeakyReLU(negative_slope=0.01)
         self.fc2 = nn.Linear(neuron_count, neuron_count)
@@ -35,7 +50,6 @@ class NeuralBarrierCertificate(nn.Module):
         self.leaky_relu3 = nn.LeakyReLU(negative_slope=0.01)
         self.fc_out = nn.Linear(neuron_count, output_size)
 
-        # to be defined later
         self.optimizer = None
 
     def forward(self, x):
@@ -45,17 +59,11 @@ class NeuralBarrierCertificate(nn.Module):
         x = self.fc_out(x)
         return x
 
-    def prepare_data(self, X, labels):
-        X_safe = X[labels == 1]
-        X_unsafe = X[labels == 2]
-        X_other = X[labels == 0]
-
-        return X_safe, X_unsafe, X_other
-
     def configure_optimizer(self):
         self.optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
 
-    def train_model(self, epochs):
+    def train_model(self, epochs, tauo, tauu, taud):
+        self.logger.info(f"Training model with Tauo = {tauo}, Tauu = {tauu}, Taud = {taud}")
         if self.optimizer is None:
             self.configure_optimizer()
 
@@ -67,9 +75,9 @@ class NeuralBarrierCertificate(nn.Module):
                                       torch.zeros(len(self.X_other), dtype=torch.long))  # Example
 
         loaders = {
-            'safe': DataLoader(safe_dataset, batch_size=64, shuffle=True),
-            'unsafe': DataLoader(unsafe_dataset, batch_size=64, shuffle=True),
-             'other': DataLoader(other_dataset, batch_size=64, shuffle=True)
+            'safe': DataLoader(safe_dataset, batch_size=self.batch_size, shuffle=True),
+            'unsafe': DataLoader(unsafe_dataset, batch_size=self.batch_size, shuffle=True),
+            'other': DataLoader(other_dataset, batch_size=self.batch_size, shuffle=True)
         }
 
         for epoch in range(epochs):
@@ -78,12 +86,15 @@ class NeuralBarrierCertificate(nn.Module):
             for group_type, loader in loaders.items():
                 for inputs, targets in loader:
                     self.optimizer.zero_grad()
-                    loss = self.nbc_loss_enhanced(inputs, group_type)
+                    loss = self.nbc_loss_enhanced(inputs, group_type, tauo=tauo, tauu=tauu, taud=taud)
                     loss.backward()
                     self.optimizer.step()
                     total_loss += loss.item()
-            if epoch % (epochs/10) == 0:
-                print(f'Epoch {epoch + 1}, Combined Loss: {total_loss:.4f}')
+            if epoch % (epochs / 2) == 0:
+                self.logger.info(f'Epoch {epoch + 1}, Combined Loss: {total_loss:.4f}')
+
+            if epoch == epochs-1:
+                self.logger.info(f"Final Loss: {total_loss:.4f}")
 
     def compute_B_dot(self, x):
         x.requires_grad_(True)
@@ -101,11 +112,11 @@ class NeuralBarrierCertificate(nn.Module):
 
         return B_dot
 
-    def sat_relu(self, x,  saturation_limit=1.0):
+    def sat_relu(self, x, saturation_limit=1.0):
         relu = F.relu(x)
         return torch.clamp(relu, max=saturation_limit)
 
-    def nbc_loss_enhanced(self, x, group_type, tauo=0.05, tauu=0.15, taud=0.1, alpha=0.01, beta=1.0):
+    def nbc_loss_enhanced(self, x, group_type, tauo=-0.05, tauu=0.15, taud=-0.001, alpha=0.01, beta=1.0):
         output = self(x)
         B_dot = self.compute_B_dot(x)
 
@@ -116,24 +127,7 @@ class NeuralBarrierCertificate(nn.Module):
         elif group_type == 'unsafe':
             loss += torch.mean(F.relu(-output - tauu) - alpha * self.sat_relu(output + tauu, beta))
 
-        #loss += torch.mean(-self.sat_relu(-B_dot + taud, beta))
-
-        loss += torch.mean(torch.maximum(taud * torch.ones_like(B_dot), B_dot))
-
-        return loss
-
-    def nbc_loss(self, x, group_type, tauo=0.05, tauu=0.05, taud=0.05, alpha=0.01, beta=1.0):
-        output = self(x)
-        B_dot = self.compute_B_dot(x)
-
-        loss = 0
-
-        if group_type == 'safe':
-            loss += torch.mean(torch.maximum(tauo * torch.ones_like(output), output))
-        elif group_type == 'unsafe':
-            loss +=torch.mean(torch.maximum(tauu * torch.ones_like(output), -output))
-
-        #loss += torch.mean(-self.sat_leaky_relu(-B_dot + taud,0, beta))
+        # loss += torch.mean(-self.sat_relu(-B_dot + taud, beta))
 
         loss += torch.mean(torch.maximum(taud * torch.ones_like(B_dot), B_dot))
 
