@@ -62,7 +62,7 @@ class NeuralBarrierCertificate(nn.Module):
     def configure_optimizer(self):
         self.optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
 
-    def train_model(self, epochs, tauo, tauu, taud):
+    def train_model(self, epochs, tauo, tauu, taud, device):
         self.logger.info(f"Training model with Tauo = {tauo}, Tauu = {tauu}, Taud = {taud}")
         if self.optimizer is None:
             self.configure_optimizer()
@@ -85,6 +85,7 @@ class NeuralBarrierCertificate(nn.Module):
 
             for group_type, loader in loaders.items():
                 for inputs, targets in loader:
+                    inputs, targets = inputs.to(device), targets.to(device)
                     self.optimizer.zero_grad()
                     loss = self.nbc_loss_enhanced(inputs, group_type, tauo=tauo, tauu=tauu, taud=taud)
                     loss.backward()
