@@ -38,16 +38,16 @@ def visualise_darboux(image_dir, X, Xo, Xu):
     plt.savefig(image_path)
 
 
-def plot_model(model, image_dir, tau_value):
+def plot_model(model, image_dir, tau_value, device):
     x = np.linspace(-2, 2, 500)
     y = np.linspace(-2, 2, 500)
     X, Y = np.meshgrid(x, y)
 
     points = np.vstack([X.ravel(), Y.ravel()]).T
-    points_tensor = torch.tensor(points, dtype=torch.float32)
+    points_tensor = torch.tensor(points, dtype=torch.float32).to(device)
 
     with torch.no_grad():
-        B_values = model(points_tensor).numpy()
+        B_values = (model(points_tensor)).cpu().numpy()
 
     B_values = B_values.reshape(X.shape)
 

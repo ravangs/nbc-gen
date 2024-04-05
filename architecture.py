@@ -67,12 +67,17 @@ class NeuralBarrierCertificate(nn.Module):
         if self.optimizer is None:
             self.configure_optimizer()
 
-        safe_dataset = TensorDataset(torch.tensor(self.X_safe, dtype=torch.float32),
-                                     torch.ones(len(self.X_safe), dtype=torch.long))
-        unsafe_dataset = TensorDataset(torch.tensor(self.X_unsafe, dtype=torch.float32),
-                                       torch.ones(len(self.X_unsafe), dtype=torch.long) * 2)
-        other_dataset = TensorDataset(torch.tensor(self.X_other, dtype=torch.float32),
-                                      torch.zeros(len(self.X_other), dtype=torch.long))  # Example
+        X_safe_tensor = torch.tensor(self.X_safe, dtype=torch.float32).to(device)
+        X_unsafe_tensor = torch.tensor(self.X_unsafe, dtype=torch.float32).to(device)
+        X_other_tensor = torch.tensor(self.X_other, dtype=torch.float32).to(device)
+
+        y_safe_tensor = torch.ones(X_safe_tensor.size(0), dtype=torch.long).to(device)
+        y_unsafe_tensor = torch.ones(X_unsafe_tensor.size(0), dtype=torch.long).to(device) * 2
+        y_other_tensor = torch.zeros(X_other_tensor.size(0), dtype=torch.long).to(device)
+
+        safe_dataset = TensorDataset(X_safe_tensor, y_safe_tensor)
+        unsafe_dataset = TensorDataset(X_unsafe_tensor, y_unsafe_tensor)
+        other_dataset = TensorDataset(X_other_tensor, y_other_tensor)
 
         loaders = {
             'safe': DataLoader(safe_dataset, batch_size=self.batch_size, shuffle=True),

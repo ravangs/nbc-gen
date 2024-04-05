@@ -10,7 +10,7 @@ def startup():
     cwd = os.getcwd()
 
     results_dir = os.path.join(cwd, 'results')
-    now = datetime.now().isoformat()
+    now = datetime.now().isoformat().replace(':', '-')
 
     current_run_dir = os.path.join(results_dir, str(now))
 
@@ -49,9 +49,9 @@ def save_model(model, model_dir, tau_value):
     torch.save(model.state_dict(), model_path)
 
 
-def evaluate_model_conditions(model, Xo, Xu):
-    Xo_tensor = torch.tensor(Xo, dtype=torch.float32)
-    Xu_tensor = torch.tensor(Xu, dtype=torch.float32)
+def evaluate_model_conditions(model, Xo, Xu, device):
+    Xo_tensor = torch.tensor(Xo, dtype=torch.float32).to(device)
+    Xu_tensor = torch.tensor(Xu, dtype=torch.float32).to(device)
 
     model.eval()
 

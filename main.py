@@ -19,6 +19,7 @@ def main():
 
     results = []
     for tau_value in config['tau_values']:
+        print(f'Tau value: {tau_value}')
         model = NeuralBarrierCertificate(X, labels, input_size=config["input_size"],
                                          count=config["count"],
                                          order=config["order"],
@@ -33,9 +34,9 @@ def main():
         save_model(model, model_dir, tau_value)
 
         model.eval()
-        plot_model(model, image_dir, tau_value)
+        plot_model(model, image_dir, tau_value, device)
 
-        Xo_prob, Xu_prob = evaluate_model_conditions(model, Xo, Xu)
+        Xo_prob, Xu_prob = evaluate_model_conditions(model, Xo, Xu, device)
 
         results.append([tau_value['tauo'], tau_value['tauu'], tau_value['taud'], Xo_prob, Xu_prob])
 
